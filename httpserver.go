@@ -64,6 +64,7 @@ func newTemplateFuncMap() template.FuncMap {
 		"timeNow":                     time.Now,
 		"localHostname":               GetLocalHostname,
 		"getInterfaceIPAddressString": getInterfaceIPAddressString,
+		"readCPUInfo":                 readCPUInfo,
 	}
 }
 
