@@ -70,6 +70,8 @@ func newTemplateFuncMap() template.FuncMap {
 		"localHostname":                 GetLocalHostname,
 		"getInterfaceIPAddressesString": getInterfaceIPAddressesString,
 		"readCPUInfo":                   readCPUInfo,
+		"readNetworkDeviceStats":        readNetworkDeviceStats,
+		"getNetworkInterfaceRates":      getNetworkInterfaceRates,
 	}
 }
 

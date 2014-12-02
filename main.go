@@ -66,6 +66,9 @@ func main() {
 		IfaceList.Append(iface)
 	}
 
+	// Read stats to get initial data for network interface stats.
+	readNetworkDeviceStats()
+
 	if err = <-StartHTTPServer(*port); err != nil {
 		Log.WithField("error", err).Fatal("Error starting HTTP server.")
 	}
