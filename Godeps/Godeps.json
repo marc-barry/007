@@ -8,16 +8,16 @@
 			"Rev": "6ebb4e7b3c24b9fef150d7693e728cb1ebadf1f5"
 		},
 		{
-			"ImportPath": "github.com/c9s/goprocinfo/linux",
-			"Rev": "d81023fa029f1c926593efbb5374394b048b8824"
-		},
-		{
 			"ImportPath": "github.com/gorilla/context",
 			"Rev": "14f550f51af52180c2eefed15e5fd18d63c0a64a"
 		},
 		{
 			"ImportPath": "github.com/gorilla/mux",
 			"Rev": "e444e69cbd2e2e3e0749a2f3c717cec491552bbf"
+		},
+		{
+			"ImportPath": "github.com/marc-barry/goprocinfo/linux",
+			"Rev": "814e54cf4b8a38c67b17d61f43af885642f18977"
 		}
 	]
 }
