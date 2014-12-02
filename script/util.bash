@@ -21,9 +21,9 @@ ensure_go_binary() {
 }
 
 function config_errcheck() {
-  errcheck_path="$(godep path)/src/github.com/marc-barry/"
+  errcheck_path="$(godep path)/src/github.com/marc-barry"
   
-  if [ ! -d "${lerrcheck_path}" ] && mkdir -p "${errcheck_path}"; then
+  if [ ! -d "${errcheck_path}" ] && mkdir -p "${errcheck_path}"; then
     ln -sf "${root_path}" "${errcheck_path}/007"
     trap 'rm -r "${errcheck_path}"' EXIT
   else
