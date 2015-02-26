@@ -6,7 +6,6 @@ import (
 	"html/template"
 	"net"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -50,27 +49,13 @@ type TemplateHandler struct {
 	baseTemplate *template.Template
 }
 
-func getInterfaceIPAddressesString(iface net.Interface) string {
-	addrs, err := iface.Addrs()
-	if err != nil {
-		return err.Error()
-	}
-
-	var addrStrings = make([]string, 0, len(addrs))
-	for _, addr := range addrs {
-		addrStrings = append(addrStrings, addr.String())
-	}
-
-	return strings.Join(addrStrings, ", ")
-}
-
 func newTemplateFuncMap() template.FuncMap {
 	return template.FuncMap{
 		"timeNow":                       time.Now,
 		"localHostname":                 GetLocalHostname,
 		"getInterfaceIPAddressesString": getInterfaceIPAddressesString,
-		"readCPUInfo":                   readCPUInfo,
-		"readNetworkDeviceStats":        readNetworkDeviceStats,
+		"getCPUInfo":                    getCPUInfo,
+		"getNetworkDeviceStats":         getNetworkDeviceStats,
 		"getNetworkInterfaceRates":      getNetworkInterfaceRates,
 	}
 }

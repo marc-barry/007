@@ -8,20 +8,23 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/Sirupsen/logrus"
 )
 
 const (
-	HTTPEnableFlag = "http-enable"
-	HTTPPortFlag   = "http-port"
+	HTTPEnableFlag                = "http-enable"
+	HTTPPortFlag                  = "http-port"
+	CollectInterfaceRateStatsRate = "collect-iface-rate-stat-rate"
 )
 
 var (
 	Log = logrus.New()
 
-	httpEnable = flag.Bool(HTTPEnableFlag, false, "Enable HTTP server.")
-	httpPort   = flag.Int(HTTPPortFlag, 8001, "HTTP server listening port.")
+	httpEnable                    = flag.Bool(HTTPEnableFlag, false, "Enable HTTP server.")
+	httpPort                      = flag.Int(HTTPPortFlag, 8001, "HTTP server listening port.")
+	collectInterfaceRateStatsRate = flag.Int64(CollectInterfaceRateStatsRate, 2, "Rate (in seconds) for which the interface rate stats are collected.")
 
 	stopOnce sync.Once
 	stopWg   sync.WaitGroup
@@ -71,8 +74,7 @@ func main() {
 		IfaceList.Append(iface)
 	}
 
-	// Read stats to get initial data for network interface stats.
-	readNetworkDeviceStats()
+	startCollectors()
 
 	if *httpEnable {
 		if err := <-StartHTTPServer(*httpPort); err != nil {
@@ -96,4 +98,21 @@ func shutdown(code int) {
 	}
 
 	stopWg.Done()
+}
+
+func startCollectors() {
+	if err := calculateInterfaceRateStats(); err != nil {
+		Log.WithField("error", err).Error("Error calculating interface rate stats.")
+	} else {
+		go withLogging(func() {
+			for {
+				select {
+				case <-time.Tick(time.Duration(*collectInterfaceRateStatsRate) * time.Second):
+					if err := calculateInterfaceRateStats(); err != nil {
+						Log.WithField("error", err).Error("Error calculating interface rate stats.")
+					}
+				}
+			}
+		})
+	}
 }
