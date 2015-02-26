@@ -15,17 +15,53 @@ func (self *CPUInfo) NumCPU() int {
 	return len(self.Processors)
 }
 
+func (self *CPUInfo) NumCore() int {
+	core := make(map[string]bool)
+
+	for _, p := range self.Processors {
+		pid := p.PhysicalId
+		cid := p.CoreId
+
+		if pid == -1 {
+			return self.NumCPU()
+		} else {
+			// to avoid fmt import
+			key := strconv.FormatInt(int64(pid), 10) + ":" + strconv.FormatInt(int64(cid), 10)
+			core[key] = true
+		}
+	}
+
+	return len(core)
+}
+
+func (self *CPUInfo) NumPhysicalCPU() int {
+	pcpu := make(map[string]bool)
+
+	for _, p := range self.Processors {
+		pid := p.PhysicalId
+
+		if pid == -1 {
+			return self.NumCPU()
+		} else {
+			// to avoid fmt import
+			key := strconv.FormatInt(int64(pid), 10)
+			pcpu[key] = true
+		}
+	}
+
+	return len(pcpu)
+}
+
 type Processor struct {
 	Id         int64    `json:"id"`
 	VendorId   string   `json:"vendor_id"`
 	Model      int64    `json:"model"`
 	ModelName  string   `json:"model_name"`
 	Flags      []string `json:"flags"`
-	PhysicalId int64    `json:"physical_id"`
-	Siblings   int64    `json:"siblings"`
-	CoreId     int64    `json:"core_id"`
 	Cores      int64    `json:"cores"`
 	MHz        float64  `json:"mhz"`
+	PhysicalId int64    `json:"physical_id"`
+	CoreId     int64    `json:"core_id"`
 }
 
 var cpuinfoRegExp = regexp.MustCompile("([^:]*?)\\s*:\\s*(.*)$")
@@ -40,7 +76,7 @@ func ReadCPUInfo(path string) (*CPUInfo, error) {
 	lines := strings.Split(content, "\n")
 
 	var cpuinfo = CPUInfo{}
-	var processor = &Processor{}
+	var processor = &Processor{CoreId: -1, PhysicalId: -1}
 
 	for i, line := range lines {
 		var key string
@@ -70,16 +106,14 @@ func ReadCPUInfo(path string) (*CPUInfo, error) {
 			processor.ModelName = value
 		case "flags":
 			processor.Flags = strings.Fields(value)
-		case "physical id":
-			processor.PhysicalId, _ = strconv.ParseInt(value, 10, 32)
-		case "siblings":
-			processor.Siblings, _ = strconv.ParseInt(value, 10, 32)
-		case "core id":
-			processor.CoreId, _ = strconv.ParseInt(value, 10, 32)
 		case "cpu cores":
 			processor.Cores, _ = strconv.ParseInt(value, 10, 32)
 		case "cpu MHz":
 			processor.MHz, _ = strconv.ParseFloat(value, 64)
+		case "physical id":
+			processor.PhysicalId, _ = strconv.ParseInt(value, 10, 32)
+		case "core id":
+			processor.CoreId, _ = strconv.ParseInt(value, 10, 32)
 		}
 		/*
 			processor	: 0
