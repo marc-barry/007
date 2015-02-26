@@ -1,7 +1,6 @@
 package main
 
 import (
-	"sort"
 	"sync"
 	"time"
 )
@@ -25,12 +24,6 @@ type InterfaceRateStat struct {
 
 	lastCheckTime time.Time
 }
-
-type InterfaceRateStats []InterfaceRateStat
-
-func (l InterfaceRateStats) Len() int           { return len(l) }
-func (l InterfaceRateStats) Swap(i, j int)      { l[i], l[j] = l[j], l[i] }
-func (l InterfaceRateStats) Less(i, j int) bool { return l[i].Iface < l[j].Iface }
 
 func calculateInterfaceRateStats() error {
 	interfaceRatesMu.Lock()
@@ -79,17 +72,17 @@ func calculateInterfaceRateStats() error {
 	return nil
 }
 
-func getNetworkInterfaceRates() []InterfaceRateStat {
+func copyInterfaceRateStats() []InterfaceRateStat {
 	interfaceRatesMu.RLock()
 	defer interfaceRatesMu.RUnlock()
 
-	rates := make(InterfaceRateStats, 0)
+	rates := make([]InterfaceRateStat, len(interfaceRates))
 
+	i := 0
 	for _, stat := range interfaceRates {
-		rates = append(rates, stat)
+		rates[i] = stat
+		i++
 	}
-
-	sort.Sort(rates)
 
 	return rates
 }
