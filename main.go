@@ -13,15 +13,20 @@ import (
 )
 
 const (
-	PortFlag = "p"
+	HTTPEnableFlag = "http-enable"
+	HTTPPortFlag   = "http-port"
 )
 
 var (
-	Log       = logrus.New()
-	stopOnce  sync.Once
-	IfaceList = NewInterfaceList()
+	Log = logrus.New()
 
-	port = flag.Int(PortFlag, 8001, "HTTP server listening port.")
+	httpEnable = flag.Bool(HTTPEnableFlag, false, "Enable HTTP server.")
+	httpPort   = flag.Int(HTTPPortFlag, 8001, "HTTP server listening port.")
+
+	stopOnce sync.Once
+	stopWg   sync.WaitGroup
+
+	IfaceList = NewInterfaceList()
 )
 
 func withLogging(f func()) {
@@ -69,13 +74,26 @@ func main() {
 	// Read stats to get initial data for network interface stats.
 	readNetworkDeviceStats()
 
-	if err = <-StartHTTPServer(*port); err != nil {
-		Log.WithField("error", err).Fatal("Error starting HTTP server.")
+	if *httpEnable {
+		if err := <-StartHTTPServer(*httpPort); err != nil {
+			Log.WithField("error", err).Fatal("Error starting HTTP server.")
+		}
+
+		return
 	}
+
+	// If HTTP is not enabled we need to block with a wait on a WaitGroup.
+	stopWg.Add(1)
+	stopWg.Wait()
 }
 
 func shutdown(code int) {
 	Log.WithField("code", code).Infof("Stopping.")
 
-	os.Exit(0)
+	// If HTTP is enabled we must exit in order to cause the HTTP server to shutdown.
+	if *httpEnable {
+		os.Exit(0)
+	}
+
+	stopWg.Done()
 }
