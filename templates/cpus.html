@@ -1,6 +1,6 @@
 {{ template "header" }}
 
-{{ $cpuInfo:= readCPUInfo }}
+{{ $cpuInfo:= getCPUInfo }}
 
 {{ if $cpuInfo }}
   <div class="container">

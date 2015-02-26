@@ -1,6 +1,6 @@
 {{ template "header" }}
 
-{{ $netDevStats := readNetworkDeviceStats }}
+{{ $netDevStats := getNetworkDeviceStats }}
 {{ $interfaceRateStats := getNetworkInterfaceRates }}
 
 <div class="container">
