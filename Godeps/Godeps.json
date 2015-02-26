@@ -1,11 +1,15 @@
 {
 	"ImportPath": "github.com/marc-barry/007",
-	"GoVersion": "go1.3.3",
+	"GoVersion": "go1.4.1",
 	"Deps": [
 		{
 			"ImportPath": "github.com/Sirupsen/logrus",
-			"Comment": "v0.6.0",
-			"Rev": "6ebb4e7b3c24b9fef150d7693e728cb1ebadf1f5"
+			"Comment": "v0.6.5",
+			"Rev": "c0f7e35ed2e48f188c37581b4b743cf7383f85c6"
+		},
+		{
+			"ImportPath": "github.com/c9s/goprocinfo/linux",
+			"Rev": "41b3e2b78145d252a6d4c42707ae503679989e6c"
 		},
 		{
 			"ImportPath": "github.com/gorilla/context",
@@ -13,11 +17,7 @@
 		},
 		{
 			"ImportPath": "github.com/gorilla/mux",
-			"Rev": "e444e69cbd2e2e3e0749a2f3c717cec491552bbf"
-		},
-		{
-			"ImportPath": "github.com/marc-barry/goprocinfo/linux",
-			"Rev": "814e54cf4b8a38c67b17d61f43af885642f18977"
+			"Rev": "8a875a034c69b940914d83ea03d3f1299b4d094b"
 		}
 	]
 }

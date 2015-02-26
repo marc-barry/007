@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	linuxproc "github.com/marc-barry/goprocinfo/linux"
+	linuxproc "github.com/c9s/goprocinfo/linux"
 )
 
 var (
