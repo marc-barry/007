@@ -2,10 +2,25 @@ package main
 
 import (
 	"net"
+	"sort"
 	"strings"
 
 	linuxproc "github.com/c9s/goprocinfo/linux"
 )
+
+// InterfaceRateStats implements sort.Interface for []InterfaceRateStat based on Iface (i.e. interface name).
+type InterfaceRateStats []InterfaceRateStat
+
+func (l InterfaceRateStats) Len() int           { return len(l) }
+func (l InterfaceRateStats) Swap(i, j int)      { l[i], l[j] = l[j], l[i] }
+func (l InterfaceRateStats) Less(i, j int) bool { return l[i].Iface < l[j].Iface }
+
+// NetworkStats implements sort.Interface for []linuxproc.NetworkStat based on Iface (i.e. interface name).
+type NetworkStats []linuxproc.NetworkStat
+
+func (l NetworkStats) Len() int           { return len(l) }
+func (l NetworkStats) Swap(i, j int)      { l[i], l[j] = l[j], l[i] }
+func (l NetworkStats) Less(i, j int) bool { return l[i].Iface < l[j].Iface }
 
 func getInterfaceIPAddressesString(iface net.Interface) string {
 	addrs, err := iface.Addrs()
@@ -34,5 +49,16 @@ func getNetworkDeviceStats() []linuxproc.NetworkStat {
 	if err != nil {
 		Log.WithField("error", err).Error("Error reading network device stats.")
 	}
+
+	sort.Sort(NetworkStats(stats))
+
+	return stats
+}
+
+func getInterfaceRateStats() []InterfaceRateStat {
+	stats := copyInterfaceRateStats()
+
+	sort.Sort(InterfaceRateStats(stats))
+
 	return stats
 }

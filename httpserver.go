@@ -56,7 +56,7 @@ func newTemplateFuncMap() template.FuncMap {
 		"getInterfaceIPAddressesString": getInterfaceIPAddressesString,
 		"getCPUInfo":                    getCPUInfo,
 		"getNetworkDeviceStats":         getNetworkDeviceStats,
-		"getNetworkInterfaceRates":      getNetworkInterfaceRates,
+		"getInterfaceRateStats":         getInterfaceRateStats,
 	}
 }
 
