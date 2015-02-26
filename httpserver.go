@@ -93,8 +93,6 @@ func (handler *TemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 		Interfaces: IfaceList.All(),
 	}
 
-	Log.WithField("RemoteAddr", r.RemoteAddr).WithField("url", r.URL).Info("Serving template.")
-
 	if err := handler.baseTemplate.ExecuteTemplate(w, template, args); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
