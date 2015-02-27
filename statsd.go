@@ -1,7 +1,10 @@
 package main
 
-func collectNetworkDeviceStats() {
+import (
+	"encoding/json"
+)
 
+func collectNetworkDeviceStats() {
 	stats, err := readNetworkDeviceStats()
 
 	if err != nil {
@@ -9,6 +12,13 @@ func collectNetworkDeviceStats() {
 	}
 
 	for _, stat := range stats {
+		jsonBytes, err := json.Marshal(stat)
+		if err != nil {
+			Log.WithField("error", err).Errorf("Error JSON marshalling: %+v.", stat)
+		}
+
+		Log.WithField("metric", NetworkStatPath).Infof(string(jsonBytes))
+
 		// Rx stats
 		if err := StatsdClient.Count("net.dev.rxbytes", int64(stat.RxBytes), []string{"iface:" + stat.Iface}, 1); err != nil {
 			Log.WithField("error", err).Error("Couldn't submit event to statsd.")
