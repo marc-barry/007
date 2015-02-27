@@ -4,10 +4,15 @@ import (
 	linuxproc "github.com/c9s/goprocinfo/linux"
 )
 
+const (
+	CPUInfoPath     = "/proc/cpuinfo"
+	NetworkStatPath = "/proc/net/dev"
+)
+
 func readCPUInfo() (*linuxproc.CPUInfo, error) {
-	return linuxproc.ReadCPUInfo("/proc/cpuinfo")
+	return linuxproc.ReadCPUInfo(CPUInfoPath)
 }
 
 func readNetworkDeviceStats() ([]linuxproc.NetworkStat, error) {
-	return linuxproc.ReadNetworkStat("/proc/net/dev")
+	return linuxproc.ReadNetworkStat(NetworkStatPath)
 }
