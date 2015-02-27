@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"regexp"
 	"sync"
 	"syscall"
 	"time"
@@ -14,27 +15,30 @@ import (
 )
 
 const (
-	DogstatsdAddressFlag = "dogstatsd-address"
-	HTTPEnableFlag       = "http-enable"
-	HTTPPortFlag         = "http-port"
-	CalculateRate        = "calculate-rate"
-	CollectRate          = "collect-rate"
+	DogstatsdAddressFlag     = "dogstatsd-address"
+	HTTPEnableFlag           = "http-enable"
+	HTTPPortFlag             = "http-port"
+	CalculateRate            = "calculate-rate"
+	CollectRate              = "collect-rate"
+	StatsInterfaceFilterFlag = "stats-interface-filter"
 )
 
 var (
 	Log                            = logrus.New()
 	StatsdClient *dogstatsd.Client = nil
 
-	statsdAddress  = flag.String(DogstatsdAddressFlag, "", "The address of the Datadog DogStatsd server.")
-	httpEnable     = flag.Bool(HTTPEnableFlag, false, "Enable HTTP server.")
-	httpPort       = flag.Int(HTTPPortFlag, 8001, "HTTP server listening port.")
-	calculatedRate = flag.Int64(CalculateRate, 2, "Rate (in seconds) for which the rate stats are calculated.")
-	collectRate    = flag.Int64(CollectRate, 2, "Rate (in seconds) for which the stats are collected.")
+	statsdAddress        = flag.String(DogstatsdAddressFlag, "", "The address of the Datadog DogStatsd server.")
+	httpEnable           = flag.Bool(HTTPEnableFlag, false, "Enable HTTP server.")
+	httpPort             = flag.Int(HTTPPortFlag, 8001, "HTTP server listening port.")
+	calculatedRate       = flag.Int64(CalculateRate, 2, "Rate (in seconds) for which the rate stats are calculated.")
+	collectRate          = flag.Int64(CollectRate, 2, "Rate (in seconds) for which the stats are collected.")
+	statsInterfaceFilter = flag.String(StatsInterfaceFilterFlag, "", "Regular expression which filters out interfaces not reported to DogStatd.")
 
 	stopOnce sync.Once
 	stopWg   sync.WaitGroup
 
-	IfaceList = NewInterfaceList()
+	IfaceList                  = NewInterfaceList()
+	ifaceRegExp *regexp.Regexp = nil
 )
 
 func withLogging(f func()) {
@@ -77,6 +81,15 @@ func main() {
 	if StatsdClient != nil {
 		Log.WithField("address", *statsdAddress).Infof("Dialed DogStatsd server.")
 		StatsdClient.Namespace = "007."
+	}
+
+	var err error
+	if ifaceRegExp, err = regexp.Compile(*statsInterfaceFilter); err != nil {
+		Log.WithField("error", err).Errorf("Unable to compile provided regular expression: %s", *statsInterfaceFilter)
+	}
+
+	if ifaceRegExp != nil {
+		Log.WithField("regex", ifaceRegExp.String()).Infof("Compiled interface filter regualr expression.")
 	}
 
 	Log.Info("Starting info and stats calculators.")
