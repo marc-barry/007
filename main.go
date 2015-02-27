@@ -11,20 +11,26 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/ooyala/go-dogstatsd"
 )
 
 const (
-	HTTPEnableFlag                = "http-enable"
-	HTTPPortFlag                  = "http-port"
-	CollectInterfaceRateStatsRate = "collect-iface-rate-stat-rate"
+	DogstatsdAddressFlag = "dogstatsd-address"
+	HTTPEnableFlag       = "http-enable"
+	HTTPPortFlag         = "http-port"
+	CalculateRate        = "calculate-rate"
+	CollectRate          = "collect-rate"
 )
 
 var (
-	Log = logrus.New()
+	Log                            = logrus.New()
+	StatsdClient *dogstatsd.Client = nil
 
-	httpEnable                    = flag.Bool(HTTPEnableFlag, false, "Enable HTTP server.")
-	httpPort                      = flag.Int(HTTPPortFlag, 8001, "HTTP server listening port.")
-	collectInterfaceRateStatsRate = flag.Int64(CollectInterfaceRateStatsRate, 2, "Rate (in seconds) for which the interface rate stats are collected.")
+	statsdAddress  = flag.String(DogstatsdAddressFlag, "", "The address of the Datadog DogStatsd server.")
+	httpEnable     = flag.Bool(HTTPEnableFlag, false, "Enable HTTP server.")
+	httpPort       = flag.Int(HTTPPortFlag, 8001, "HTTP server listening port.")
+	calculatedRate = flag.Int64(CalculateRate, 2, "Rate (in seconds) for which the rate stats are calculated.")
+	collectRate    = flag.Int64(CollectRate, 2, "Rate (in seconds) for which the stats are collected.")
 
 	stopOnce sync.Once
 	stopWg   sync.WaitGroup
@@ -57,6 +63,23 @@ func main() {
 		}
 	}()
 
+	if *statsdAddress != "" {
+		Log.WithField("address", *statsdAddress).Infof("Attempting to dial DogStatsd server.")
+		var err error
+		StatsdClient, err = dogstatsd.New(*statsdAddress)
+		if err != nil {
+			Log.WithFields(logrus.Fields{
+				"address": *statsdAddress,
+				"error":   err,
+			}).Warn("Unable to dial StatsD.")
+		}
+	}
+
+	if StatsdClient != nil {
+		Log.WithField("address", *statsdAddress).Infof("Dialed DogStatsd server.")
+		StatsdClient.Namespace = "007."
+	}
+
 	// Get a list of all interfaces.
 	ifaces, err := net.Interfaces()
 	if err != nil {
@@ -74,7 +97,13 @@ func main() {
 		IfaceList.Append(iface)
 	}
 
-	startCollectors()
+	Log.Info("Starting stats calculators.")
+	startCalculators()
+
+	if StatsdClient != nil {
+		Log.WithField("address", *statsdAddress).Infof("Starting collectors.")
+		startCollectors()
+	}
 
 	if *httpEnable {
 		if err := <-StartHTTPServer(*httpPort); err != nil {
@@ -100,14 +129,14 @@ func shutdown(code int) {
 	stopWg.Done()
 }
 
-func startCollectors() {
+func startCalculators() {
 	if err := calculateInterfaceRateStats(); err != nil {
 		Log.WithField("error", err).Error("Error calculating interface rate stats.")
 	} else {
 		go withLogging(func() {
 			for {
 				select {
-				case <-time.Tick(time.Duration(*collectInterfaceRateStatsRate) * time.Second):
+				case <-time.Tick(time.Duration(*calculatedRate) * time.Second):
 					if err := calculateInterfaceRateStats(); err != nil {
 						Log.WithField("error", err).Error("Error calculating interface rate stats.")
 					}
@@ -115,4 +144,15 @@ func startCollectors() {
 			}
 		})
 	}
+}
+
+func startCollectors() {
+	go withLogging(func() {
+		for {
+			select {
+			case <-time.Tick(time.Duration(*collectRate) * time.Second):
+				collectNetworkDeviceStats()
+			}
+		}
+	})
 }
