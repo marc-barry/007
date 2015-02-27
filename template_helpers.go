@@ -22,6 +22,12 @@ func (l NetworkStats) Len() int           { return len(l) }
 func (l NetworkStats) Swap(i, j int)      { l[i], l[j] = l[j], l[i] }
 func (l NetworkStats) Less(i, j int) bool { return l[i].Iface < l[j].Iface }
 
+func getInterfaces() []net.Interface {
+	collectInterfaces()
+
+	return IfaceList.All()
+}
+
 func getInterfaceIPAddressesString(iface net.Interface) string {
 	addrs, err := iface.Addrs()
 	if err != nil {

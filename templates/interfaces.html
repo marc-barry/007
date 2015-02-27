@@ -11,7 +11,7 @@
     <th>Addresses</th>
   </thead>
   <tbody>
-  {{ range $iface := .Interfaces }}
+  {{ range $iface := getInterfaces }}
     <tr>
       <td>{{ $iface.Index }}</td>
       <td>{{ $iface.Name }}</td>

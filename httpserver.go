@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"html/template"
-	"net"
 	"net/http"
 	"time"
 )
@@ -42,7 +41,6 @@ func StartHTTPServer(port int) chan error {
 }
 
 type TemplateArgs struct {
-	Interfaces []net.Interface
 }
 
 type TemplateHandler struct {
@@ -53,6 +51,7 @@ func newTemplateFuncMap() template.FuncMap {
 	return template.FuncMap{
 		"timeNow":                       time.Now,
 		"localHostname":                 GetLocalHostname,
+		"getInterfaces":                 getInterfaces,
 		"getInterfaceIPAddressesString": getInterfaceIPAddressesString,
 		"getCPUInfo":                    getCPUInfo,
 		"getNetworkDeviceStats":         getNetworkDeviceStats,
@@ -74,9 +73,7 @@ func (handler *TemplateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 		template = "interfaces.html"
 	}
 
-	args := &TemplateArgs{
-		Interfaces: IfaceList.All(),
-	}
+	args := &TemplateArgs{}
 
 	if err := handler.baseTemplate.ExecuteTemplate(w, template, args); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

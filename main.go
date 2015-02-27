@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"net"
 	"os"
 	"os/signal"
 	"sync"
@@ -80,24 +79,7 @@ func main() {
 		StatsdClient.Namespace = "007."
 	}
 
-	// Get a list of all interfaces.
-	ifaces, err := net.Interfaces()
-	if err != nil {
-		Log.WithField("error", err).Fatalf("Error getting the list of interfaces.")
-	}
-
-	Log.WithField("count", len(ifaces)).Info("Found interfaces.")
-
-	for _, iface := range ifaces {
-		Log.WithFields(logrus.Fields{
-			"index": iface.Index,
-			"name":  iface.Name,
-		}).Info("Found interface.")
-
-		IfaceList.Append(iface)
-	}
-
-	Log.Info("Starting stats calculators.")
+	Log.Info("Starting info and stats calculators.")
 	startCalculators()
 
 	if StatsdClient != nil {
