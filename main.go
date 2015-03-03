@@ -66,6 +66,8 @@ func main() {
 		fmt.Println("Supported stats:")
 		fmt.Println(NetworkStatPath)
 		fmt.Println("--- " + strings.Join(getNetworkDeviceStatsList(), ","))
+		fmt.Println(NetstatStatPath)
+		fmt.Println("--- " + strings.Join(getNetstatStatsList(), ","))
 		os.Exit(0)
 	}
 
@@ -163,6 +165,7 @@ func startCollectors() {
 			select {
 			case <-time.Tick(time.Duration(*collectRate) * time.Second):
 				collectNetworkDeviceStats()
+				collectNetstatStats()
 			}
 		}
 	})
