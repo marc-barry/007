@@ -23,6 +23,7 @@ const (
 	CollectRate              = "collect-rate"
 	StatsInterfaceFilterFlag = "stats-interface-filter"
 	StatsFlag                = "stats"
+	HelpFlag                 = "h"
 )
 
 var (
@@ -36,6 +37,7 @@ var (
 	collectRate          = flag.Int64(CollectRate, 2, "Rate (in seconds) for which the stats are collected.")
 	statsInterfaceFilter = flag.String(StatsInterfaceFilterFlag, "", "Regular expression which filters out interfaces not reported to DogStatd.")
 	statsList            = flag.String(StatsFlag, "", "The list of stats send to the DogStatsd server.")
+	help                 = flag.Bool(HelpFlag, false, "Prints help info.")
 
 	stopOnce sync.Once
 	stopWg   sync.WaitGroup
@@ -59,6 +61,13 @@ func withLogging(f func()) {
 
 func main() {
 	flag.Parse()
+
+	if *help {
+		fmt.Println("Supported stats:")
+		fmt.Println(NetworkStatPath)
+		fmt.Println("--- " + strings.Join(getNetworkDeviceStatsList(), ","))
+		os.Exit(0)
+	}
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
