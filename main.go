@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"regexp"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -21,6 +22,8 @@ const (
 	CalculateRate            = "calculate-rate"
 	CollectRate              = "collect-rate"
 	StatsInterfaceFilterFlag = "stats-interface-filter"
+	StatsFlag                = "stats"
+	HelpFlag                 = "h"
 )
 
 var (
@@ -33,12 +36,15 @@ var (
 	calculatedRate       = flag.Int64(CalculateRate, 2, "Rate (in seconds) for which the rate stats are calculated.")
 	collectRate          = flag.Int64(CollectRate, 2, "Rate (in seconds) for which the stats are collected.")
 	statsInterfaceFilter = flag.String(StatsInterfaceFilterFlag, "", "Regular expression which filters out interfaces not reported to DogStatd.")
+	statsList            = flag.String(StatsFlag, "", "The list of stats send to the DogStatsd server.")
+	help                 = flag.Bool(HelpFlag, false, "Prints help info.")
 
 	stopOnce sync.Once
 	stopWg   sync.WaitGroup
 
 	IfaceList                  = NewInterfaceList()
 	ifaceRegExp *regexp.Regexp = nil
+	StatsMap                   = make(map[string]string)
 )
 
 func withLogging(f func()) {
@@ -55,6 +61,13 @@ func withLogging(f func()) {
 
 func main() {
 	flag.Parse()
+
+	if *help {
+		fmt.Println("Supported stats:")
+		fmt.Println(NetworkStatPath)
+		fmt.Println("--- " + strings.Join(getNetworkDeviceStatsList(), ","))
+		os.Exit(0)
+	}
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
@@ -96,6 +109,9 @@ func main() {
 	startCalculators()
 
 	if StatsdClient != nil {
+		for _, stat := range strings.Split(*statsList, ",") {
+			StatsMap[stat] = stat
+		}
 		Log.WithField("address", *statsdAddress).Infof("Starting collectors.")
 		startCollectors()
 	}
