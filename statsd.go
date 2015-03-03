@@ -49,3 +49,37 @@ func collectNetworkDeviceStats() {
 		}
 	}
 }
+
+func collectNetstatStats() {
+	stats, err := readNetstatStats()
+
+	metricPrefix := "net.dev."
+
+	if err != nil {
+		Log.WithField("error", err).Error("Error reading network device stats. Can't collect netstat stats.")
+	}
+
+	jsonBytes, err := json.Marshal(stats)
+	if err != nil {
+		Log.WithField("error", err).Errorf("Error JSON marshalling: %+v.", stats)
+	}
+
+	Log.WithField("stat", NetstatStatPath).Infof(string(jsonBytes))
+
+	elem := reflect.ValueOf(stats).Elem()
+	typeOfElem := elem.Type()
+
+	for i := 0; i < elem.NumField(); i++ {
+		field := typeOfElem.Field(i)
+
+		value := elem.Field(i).Uint()
+
+		_, collect := StatsMap[field.Name]
+
+		if metricName := field.Tag.Get("json"); collect && metricName != "" {
+			if err := StatsdClient.Count(strings.Join([]string{metricPrefix, metricName}, ""), int64(value), []string{}, 1); err != nil {
+				Log.WithField("error", err).Error("Couldn't submit event to statsd.")
+			}
+		}
+	}
+}
