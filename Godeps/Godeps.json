@@ -1,11 +1,15 @@
 {
 	"ImportPath": "github.com/marc-barry/007",
-	"GoVersion": "go1.4.1",
+	"GoVersion": "go1.4.2",
 	"Deps": [
 		{
 			"ImportPath": "github.com/Sirupsen/logrus",
 			"Comment": "v0.6.5",
 			"Rev": "c0f7e35ed2e48f188c37581b4b743cf7383f85c6"
+		},
+		{
+			"ImportPath": "github.com/c9s/goprocinfo/linux",
+			"Rev": "72b9a2c766e9166a40de2edab5c9105ad2127e41"
 		},
 		{
 			"ImportPath": "github.com/gorilla/context",
@@ -14,10 +18,6 @@
 		{
 			"ImportPath": "github.com/gorilla/mux",
 			"Rev": "8a875a034c69b940914d83ea03d3f1299b4d094b"
-		},
-		{
-			"ImportPath": "github.com/marc-barry/goprocinfo/linux",
-			"Rev": "88a7384c28daa3b95abaec25071bf335a427d9dc"
 		},
 		{
 			"ImportPath": "github.com/ooyala/go-dogstatsd",
