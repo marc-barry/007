@@ -23,6 +23,7 @@ const (
 	CollectRate              = "collect-rate"
 	StatsInterfaceFilterFlag = "stats-interface-filter"
 	StatsFlag                = "stats"
+	JsonLogFlag              = "json-log"
 	HelpFlag                 = "h"
 )
 
@@ -37,6 +38,7 @@ var (
 	collectRate          = flag.Int64(CollectRate, 2, "Rate (in seconds) for which the stats are collected.")
 	statsInterfaceFilter = flag.String(StatsInterfaceFilterFlag, "", "Regular expression which filters out interfaces not reported to DogStatd.")
 	statsList            = flag.String(StatsFlag, "", "The list of stats send to the DogStatsd server.")
+	jsonLog              = flag.Bool(JsonLogFlag, false, "Enable JSON logging. The default format is text.")
 	help                 = flag.Bool(HelpFlag, false, "Prints help info.")
 
 	stopOnce sync.Once
@@ -69,6 +71,10 @@ func main() {
 		fmt.Println(NetstatStatPath)
 		fmt.Println("--- " + strings.Join(getNetstatStatsList(), ","))
 		os.Exit(0)
+	}
+
+	if *jsonLog {
+		Log.Formatter = new(logrus.JSONFormatter)
 	}
 
 	c := make(chan os.Signal, 1)
