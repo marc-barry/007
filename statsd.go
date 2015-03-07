@@ -50,7 +50,7 @@ func logNetworkDeviceStats() {
 	stats, err := readNetworkDeviceStats()
 
 	if err != nil {
-		Log.WithField("error", err).Error("Error reading network device stats. Can't collect network device stats.")
+		Log.WithField("error", err).Error("Error reading network device stats. Can't log network device stats.")
 	}
 
 	jsonBytes, err := json.Marshal(stats)
@@ -65,7 +65,7 @@ func collectNetstatStats() {
 	stats, err := readNetworkDeviceStats()
 
 	if err != nil {
-		Log.WithField("error", err).Error("Error reading network device stats. Can't collect network device stats.")
+		Log.WithField("error", err).Error("Error reading network device stats. Can't collect netstat stats.")
 	}
 
 	elem := reflect.ValueOf(stats).Elem()
@@ -90,7 +90,7 @@ func logNetstatStats() {
 	stats, err := readNetstatStats()
 
 	if err != nil {
-		Log.WithField("error", err).Error("Error reading network device stats. Can't collect netstat stats.")
+		Log.WithField("error", err).Error("Error reading network device stats. Can't log netstat stats.")
 	}
 
 	jsonBytes, err := json.Marshal(stats)
