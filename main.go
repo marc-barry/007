@@ -123,8 +123,9 @@ func main() {
 		Log.WithField("regex", ifaceRegExp.String()).Infof("Compiled interface filter regualr expression.")
 	}
 
-	Log.Info("Starting info and stats calculators.")
+	Log.Info("Starting calculators, loggers and collectors.")
 	startCalculators()
+	startLoggers()
 
 	if StatsdClient != nil {
 		for _, stat := range strings.Split(*statsList, ",") {
