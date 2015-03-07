@@ -66,10 +66,18 @@ func main() {
 
 	if *help {
 		fmt.Println("Supported stats:")
+		fmt.Print("---> ")
 		fmt.Println(NetworkStatPath)
-		fmt.Println("--- " + strings.Join(getNetworkDeviceStatsList(), ","))
+		for _, stat := range getNetworkDeviceStatsList() {
+			fmt.Println(stat.StatName + ":" + stat.MetricName)
+		}
+		fmt.Println("<---")
+		fmt.Print("---> ")
 		fmt.Println(NetstatStatPath)
-		fmt.Println("--- " + strings.Join(getNetstatStatsList(), ","))
+		for _, stat := range getNetstatStatsList() {
+			fmt.Println(stat.StatName + ":" + stat.MetricName)
+		}
+		fmt.Println("<---")
 		os.Exit(0)
 	}
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"reflect"
+	"strings"
 
 	linuxproc "github.com/c9s/goprocinfo/linux"
 )
@@ -12,6 +13,11 @@ const (
 	NetstatStatPath = "/proc/net/netstat"
 )
 
+type Stat struct {
+	StatName   string
+	MetricName string
+}
+
 func readCPUInfo() (*linuxproc.CPUInfo, error) {
 	return linuxproc.ReadCPUInfo(CPUInfoPath)
 }
@@ -20,17 +26,17 @@ func readNetworkDeviceStats() ([]linuxproc.NetworkStat, error) {
 	return linuxproc.ReadNetworkStat(NetworkStatPath)
 }
 
-func getNetworkDeviceStatsList() []string {
+func getNetworkDeviceStatsList() []Stat {
 	stat := linuxproc.NetworkStat{}
 
 	elem := reflect.ValueOf(&stat).Elem()
 	typeOfElem := elem.Type()
 
-	list := make([]string, 0)
+	list := make([]Stat, 0)
 
 	for i := 0; i < elem.NumField(); i++ {
 		if field := typeOfElem.Field(i); field.Name != "Iface" {
-			list = append(list, field.Name)
+			list = append(list, Stat{field.Name, strings.Join([]string{networkDeviceStatsMetricPrefix, field.Tag.Get("json")}, "")})
 		}
 	}
 
@@ -41,16 +47,17 @@ func readNetstatStats() (*linuxproc.Netstat, error) {
 	return linuxproc.ReadNetstat(NetstatStatPath)
 }
 
-func getNetstatStatsList() []string {
+func getNetstatStatsList() []Stat {
 	stat := linuxproc.Netstat{}
 
 	elem := reflect.ValueOf(&stat).Elem()
 	typeOfElem := elem.Type()
 
-	list := make([]string, 0)
+	list := make([]Stat, 0)
 
 	for i := 0; i < elem.NumField(); i++ {
-		list = append(list, typeOfElem.Field(i).Name)
+		field := typeOfElem.Field(i)
+		list = append(list, Stat{field.Name, strings.Join([]string{netstatStatsMetricPrefix, field.Tag.Get("json")}, "")})
 	}
 
 	return list

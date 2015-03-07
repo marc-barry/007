@@ -6,10 +6,13 @@ import (
 	"strings"
 )
 
+const (
+	networkDeviceStatsMetricPrefix = "net.dev."
+	netstatStatsMetricPrefix       = "net.netstat."
+)
+
 func collectNetworkDeviceStats() {
 	stats, err := readNetworkDeviceStats()
-
-	metricPrefix := "net.dev."
 
 	if err != nil {
 		Log.WithField("error", err).Error("Error reading network device stats. Can't collect network device stats.")
@@ -39,7 +42,7 @@ func collectNetworkDeviceStats() {
 				_, collect := StatsMap[field.Name]
 
 				if metricName := field.Tag.Get("json"); collect && metricName != "" {
-					if err := StatsdClient.Count(strings.Join([]string{metricPrefix, metricName}, ""), int64(value), []string{"iface:" + stat.Iface}, 1); err != nil {
+					if err := StatsdClient.Count(strings.Join([]string{networkDeviceStatsMetricPrefix, metricName}, ""), int64(value), []string{"iface:" + stat.Iface}, 1); err != nil {
 						Log.WithField("error", err).Error("Couldn't submit event to statsd.")
 					}
 				}
@@ -52,8 +55,6 @@ func collectNetworkDeviceStats() {
 
 func collectNetstatStats() {
 	stats, err := readNetstatStats()
-
-	metricPrefix := "net.netstat."
 
 	if err != nil {
 		Log.WithField("error", err).Error("Error reading network device stats. Can't collect netstat stats.")
@@ -77,7 +78,7 @@ func collectNetstatStats() {
 		_, collect := StatsMap[field.Name]
 
 		if metricName := field.Tag.Get("json"); collect && metricName != "" {
-			if err := StatsdClient.Count(strings.Join([]string{metricPrefix, metricName}, ""), int64(value), []string{}, 1); err != nil {
+			if err := StatsdClient.Count(strings.Join([]string{netstatStatsMetricPrefix, metricName}, ""), int64(value), []string{}, 1); err != nil {
 				Log.WithField("error", err).Error("Couldn't submit event to statsd.")
 			}
 		}
