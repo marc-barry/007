@@ -21,6 +21,7 @@ const (
 	HTTPPortFlag             = "http-port"
 	CalculateRate            = "calculate-rate"
 	CollectRate              = "collect-rate"
+	LogRate                  = "log-rate"
 	StatsInterfaceFilterFlag = "stats-interface-filter"
 	StatsFlag                = "stats"
 	JsonLogFlag              = "json-log"
@@ -36,6 +37,7 @@ var (
 	httpPort             = flag.Int(HTTPPortFlag, 8001, "HTTP server listening port.")
 	calculatedRate       = flag.Int64(CalculateRate, 2, "Rate (in seconds) for which the rate stats are calculated.")
 	collectRate          = flag.Int64(CollectRate, 2, "Rate (in seconds) for which the stats are collected.")
+	logRate              = flag.Int64(LogRate, 5, "Rate (in seconds) for which the stats are logged.")
 	statsInterfaceFilter = flag.String(StatsInterfaceFilterFlag, "", "Regular expression which filters out interfaces not reported to DogStatd.")
 	statsList            = flag.String(StatsFlag, "", "The list of stats send to the DogStatsd server.")
 	jsonLog              = flag.Bool(JsonLogFlag, false, "Enable JSON logging. The default format is text.")
@@ -180,6 +182,18 @@ func startCollectors() {
 			case <-time.Tick(time.Duration(*collectRate) * time.Second):
 				collectNetworkDeviceStats()
 				collectNetstatStats()
+			}
+		}
+	})
+}
+
+func startLoggers() {
+	go withLogging(func() {
+		for {
+			select {
+			case <-time.Tick(time.Duration(*logRate) * time.Second):
+				logNetworkDeviceStats()
+				logNetstatStats()
 			}
 		}
 	})

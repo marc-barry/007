@@ -19,13 +19,6 @@ func collectNetworkDeviceStats() {
 	}
 
 	for _, stat := range stats {
-		jsonBytes, err := json.Marshal(stat)
-		if err != nil {
-			Log.WithField("error", err).Errorf("Error JSON marshalling: %+v.", stat)
-		}
-
-		Log.WithField("stat", NetworkStatPath).Infof(string(jsonBytes))
-
 		if ifaceRegExp == nil || !ifaceRegExp.MatchString(stat.Iface) {
 			elem := reflect.ValueOf(&stat).Elem()
 			typeOfElem := elem.Type()
@@ -53,11 +46,11 @@ func collectNetworkDeviceStats() {
 	}
 }
 
-func collectNetstatStats() {
-	stats, err := readNetstatStats()
+func logNetworkDeviceStats() {
+	stats, err := readNetworkDeviceStats()
 
 	if err != nil {
-		Log.WithField("error", err).Error("Error reading network device stats. Can't collect netstat stats.")
+		Log.WithField("error", err).Error("Error reading network device stats. Can't log network device stats.")
 	}
 
 	jsonBytes, err := json.Marshal(stats)
@@ -65,7 +58,15 @@ func collectNetstatStats() {
 		Log.WithField("error", err).Errorf("Error JSON marshalling: %+v.", stats)
 	}
 
-	Log.WithField("stat", NetstatStatPath).Infof(string(jsonBytes))
+	Log.WithField("stat", NetworkStatPath).Infof(string(jsonBytes))
+}
+
+func collectNetstatStats() {
+	stats, err := readNetworkDeviceStats()
+
+	if err != nil {
+		Log.WithField("error", err).Error("Error reading network device stats. Can't collect netstat stats.")
+	}
 
 	elem := reflect.ValueOf(stats).Elem()
 	typeOfElem := elem.Type()
@@ -83,4 +84,19 @@ func collectNetstatStats() {
 			}
 		}
 	}
+}
+
+func logNetstatStats() {
+	stats, err := readNetstatStats()
+
+	if err != nil {
+		Log.WithField("error", err).Error("Error reading network device stats. Can't log netstat stats.")
+	}
+
+	jsonBytes, err := json.Marshal(stats)
+	if err != nil {
+		Log.WithField("error", err).Errorf("Error JSON marshalling: %+v.", stats)
+	}
+
+	Log.WithField("stat", NetstatStatPath).Infof(string(jsonBytes))
 }
