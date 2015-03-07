@@ -53,7 +53,7 @@ func collectNetworkDeviceStats() {
 func collectNetstatStats() {
 	stats, err := readNetstatStats()
 
-	metricPrefix := "net.dev."
+	metricPrefix := "net.netstat."
 
 	if err != nil {
 		Log.WithField("error", err).Error("Error reading network device stats. Can't collect netstat stats.")
