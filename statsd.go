@@ -2,14 +2,22 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strings"
+	"time"
 )
 
 const (
 	networkDeviceStatsMetricPrefix = "net.dev."
 	netstatStatsMetricPrefix       = "net.netstat."
 )
+
+type LoggedStat struct {
+	Name string      `json:"name"`
+	Time time.Time   `json:"time"`
+	Stat interface{} `json:"stat"`
+}
 
 func collectNetworkDeviceStats() {
 	stats, err := readNetworkDeviceStats()
@@ -40,8 +48,6 @@ func collectNetworkDeviceStats() {
 					}
 				}
 			}
-		} else {
-			Log.Infof("Filtered interface %s from network device stat collection.", stat.Iface)
 		}
 	}
 }
@@ -53,12 +59,14 @@ func logNetworkDeviceStats() {
 		Log.WithField("error", err).Error("Error reading network device stats. Can't log network device stats.")
 	}
 
-	jsonBytes, err := json.Marshal(stats)
+	loggedStat := LoggedStat{NetworkStatPath, time.Now(), stats}
+
+	jsonBytes, err := json.Marshal(loggedStat)
 	if err != nil {
 		Log.WithField("error", err).Errorf("Error JSON marshalling: %+v.", stats)
 	}
 
-	Log.WithField("stat", NetworkStatPath).Infof(string(jsonBytes))
+	fmt.Println(string(jsonBytes))
 }
 
 func collectNetstatStats() {
@@ -93,10 +101,12 @@ func logNetstatStats() {
 		Log.WithField("error", err).Error("Error reading network device stats. Can't log netstat stats.")
 	}
 
-	jsonBytes, err := json.Marshal(stats)
+	loggedStat := LoggedStat{NetstatStatPath, time.Now(), stats}
+
+	jsonBytes, err := json.Marshal(loggedStat)
 	if err != nil {
 		Log.WithField("error", err).Errorf("Error JSON marshalling: %+v.", stats)
 	}
 
-	Log.WithField("stat", NetstatStatPath).Infof(string(jsonBytes))
+	fmt.Println(string(jsonBytes))
 }
