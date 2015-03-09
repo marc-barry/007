@@ -48,8 +48,6 @@ func collectNetworkDeviceStats() {
 					}
 				}
 			}
-		} else {
-			Log.Infof("Filtered interface %s from network device stat collection.", stat.Iface)
 		}
 	}
 }
