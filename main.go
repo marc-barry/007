@@ -123,7 +123,6 @@ func main() {
 		Log.WithField("regex", ifaceRegExp.String()).Infof("Compiled interface filter regualr expression.")
 	}
 
-	Log.Info("Starting calculators, loggers and collectors.")
 	startCalculators()
 	startLoggers()
 
@@ -131,7 +130,6 @@ func main() {
 		for _, stat := range strings.Split(*statsList, ",") {
 			StatsMap[stat] = stat
 		}
-		Log.WithField("address", *statsdAddress).Infof("Starting collectors.")
 		startCollectors()
 	}
 
@@ -160,6 +158,7 @@ func shutdown(code int) {
 }
 
 func startCalculators() {
+	Log.Info("Starting calculators...")
 	if err := calculateInterfaceRateStats(); err != nil {
 		Log.WithField("error", err).Error("Error calculating interface rate stats.")
 	} else {
@@ -176,25 +175,27 @@ func startCalculators() {
 	}
 }
 
-func startCollectors() {
-	go withLogging(func() {
-		for {
-			select {
-			case <-time.Tick(time.Duration(*collectRate) * time.Second):
-				collectNetworkDeviceStats()
-				collectNetstatStats()
-			}
-		}
-	})
-}
-
 func startLoggers() {
+	Log.Info("Starting loggers...")
 	go withLogging(func() {
 		for {
 			select {
 			case <-time.Tick(time.Duration(*logRate) * time.Second):
 				logNetworkDeviceStats()
 				logNetstatStats()
+			}
+		}
+	})
+}
+
+func startCollectors() {
+	Log.Info("Starting collectors...")
+	go withLogging(func() {
+		for {
+			select {
+			case <-time.Tick(time.Duration(*collectRate) * time.Second):
+				collectNetworkDeviceStats()
+				collectNetstatStats()
 			}
 		}
 	})
