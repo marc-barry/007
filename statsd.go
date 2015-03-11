@@ -130,7 +130,7 @@ func collectSockstatStats() {
 		_, collect := StatsMap[field.Name]
 
 		if metricName := field.Tag.Get("json"); collect && metricName != "" {
-			if err := StatsdClient.Count(strings.Join([]string{sockstatStatsMetricPrefix, metricName}, ""), int64(value), []string{}, 1); err != nil {
+			if err := StatsdClient.Gauge(strings.Join([]string{sockstatStatsMetricPrefix, metricName}, ""), float64(value), []string{}, 1); err != nil {
 				Log.WithField("error", err).Error("Couldn't submit event to statsd.")
 			}
 		}
