@@ -80,6 +80,11 @@ func main() {
 			fmt.Println(stat.StatName + ":" + stat.MetricName)
 		}
 		fmt.Println("<---")
+		fmt.Println(SockstatStatPath)
+		for _, stat := range getSockstatStatsList() {
+			fmt.Println(stat.StatName + ":" + stat.MetricName)
+		}
+		fmt.Println("<---")
 		os.Exit(0)
 	}
 
@@ -183,6 +188,7 @@ func startLoggers() {
 			case <-time.Tick(time.Duration(*logRate) * time.Second):
 				logNetworkDeviceStats()
 				logNetstatStats()
+				logSockstatStats()
 			}
 		}
 	})
@@ -196,6 +202,7 @@ func startCollectors() {
 			case <-time.Tick(time.Duration(*collectRate) * time.Second):
 				collectNetworkDeviceStats()
 				collectNetstatStats()
+				collectSockstatStats()
 			}
 		}
 	})
