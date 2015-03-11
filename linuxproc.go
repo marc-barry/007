@@ -4,13 +4,14 @@ import (
 	"reflect"
 	"strings"
 
-	linuxproc "github.com/c9s/goprocinfo/linux"
+	linuxproc "github.com/marc-barry/goprocinfo/linux"
 )
 
 const (
-	CPUInfoPath     = "/proc/cpuinfo"
-	NetworkStatPath = "/proc/net/dev"
-	NetstatStatPath = "/proc/net/netstat"
+	CPUInfoPath      = "/proc/cpuinfo"
+	NetworkStatPath  = "/proc/net/dev"
+	NetstatStatPath  = "/proc/net/netstat"
+	SockstatStatPath = "/proc/net/sockstat"
 )
 
 type Stat struct {
@@ -58,6 +59,26 @@ func getNetstatStatsList() []Stat {
 	for i := 0; i < elem.NumField(); i++ {
 		field := typeOfElem.Field(i)
 		list = append(list, Stat{field.Name, strings.Join([]string{netstatStatsMetricPrefix, field.Tag.Get("json")}, "")})
+	}
+
+	return list
+}
+
+func readSockstatStats() (*linuxproc.SockStat, error) {
+	return linuxproc.ReadSockStat(SockstatStatPath)
+}
+
+func getSockstatStatsList() []Stat {
+	stat := linuxproc.SockStat{}
+
+	elem := reflect.ValueOf(&stat).Elem()
+	typeOfElem := elem.Type()
+
+	list := make([]Stat, 0)
+
+	for i := 0; i < elem.NumField(); i++ {
+		field := typeOfElem.Field(i)
+		list = append(list, Stat{field.Name, strings.Join([]string{sockstatStatsMetricPrefix, field.Tag.Get("json")}, "")})
 	}
 
 	return list
