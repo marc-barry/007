@@ -168,9 +168,10 @@ func startCalculators() {
 		Log.WithField("error", err).Error("Error calculating interface rate stats.")
 	} else {
 		go withLogging(func() {
+			c := time.Tick(time.Duration(*calculatedRate) * time.Second)
 			for {
 				select {
-				case <-time.Tick(time.Duration(*calculatedRate) * time.Second):
+				case <-c:
 					if err := calculateInterfaceRateStats(); err != nil {
 						Log.WithField("error", err).Error("Error calculating interface rate stats.")
 					}
@@ -183,9 +184,10 @@ func startCalculators() {
 func startLoggers() {
 	Log.Info("Starting loggers...")
 	go withLogging(func() {
+		c := time.Tick(time.Duration(*logRate) * time.Second)
 		for {
 			select {
-			case <-time.Tick(time.Duration(*logRate) * time.Second):
+			case <-c:
 				logNetworkDeviceStats()
 				logNetstatStats()
 				logSockstatStats()
@@ -197,9 +199,10 @@ func startLoggers() {
 func startCollectors() {
 	Log.Info("Starting collectors...")
 	go withLogging(func() {
+		c := time.Tick(time.Duration(*collectRate) * time.Second)
 		for {
 			select {
-			case <-time.Tick(time.Duration(*collectRate) * time.Second):
+			case <-c:
 				collectNetworkDeviceStats()
 				collectNetstatStats()
 				collectSockstatStats()
