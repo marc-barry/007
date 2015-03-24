@@ -85,6 +85,11 @@ func main() {
 			fmt.Println(stat.StatName + ":" + stat.MetricName)
 		}
 		fmt.Println("<---")
+		fmt.Println(SnmpStatPath)
+		for _, stat := range getSnmpStatsList() {
+			fmt.Println(stat.StatName + ":" + stat.MetricName)
+		}
+		fmt.Println("<---")
 		os.Exit(0)
 	}
 
@@ -191,6 +196,7 @@ func startLoggers() {
 				logNetworkDeviceStats()
 				logNetstatStats()
 				logSockstatStats()
+				logSnmpStats()
 			}
 		}
 	})
@@ -206,6 +212,7 @@ func startCollectors() {
 				collectNetworkDeviceStats()
 				collectNetstatStats()
 				collectSockstatStats()
+				collectSnmpStats()
 			}
 		}
 	})
